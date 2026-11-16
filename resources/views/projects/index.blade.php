@@ -35,8 +35,10 @@
             @if($project->image)
 
             <img
-                src="{{ asset('storage/' . $project->image) }}"
-                class="w-full h-52 object-cover rounded-2xl">
+    src="{{ asset('storage/' . $project->image) }}"
+    alt="{{ $project->title }}"
+    class="w-full h-56 object-cover"
+/>
 
             @endif
 

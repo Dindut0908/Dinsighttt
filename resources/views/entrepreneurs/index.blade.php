@@ -34,9 +34,11 @@
             {{-- IMAGE --}}
             @if($entrepreneur->image)
 
-            <img
-                src="{{ asset('storage/' . $entrepreneur->image) }}"
-                class="w-full h-52 object-cover rounded-2xl">
+        <img
+    src="{{ asset('storage/' . $entrepreneur->image) }}"
+    alt="{{ $entrepreneur->name }}"
+    class="w-full h-56 object-cover"
+/>
 
             @endif
 

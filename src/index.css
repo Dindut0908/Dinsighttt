@@ -1,0 +1,76 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Pengaturan dasar */
+html {
+    scroll-behavior: smooth;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+    overflow-x: hidden;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.4);
+}
+
+/* Label setiap section */
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #06b6d4;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+}
+
+/* Judul setiap section */
+.section-title {
+    margin-top: 0.75rem;
+    font-size: 2.8rem;
+    line-height: 1.1;
+    font-weight: 900;
+    color: #0f172a;
+}
+
+.dark .section-title {
+    color: white;
+}
+
+/* Deskripsi setiap section */
+.section-description {
+    margin-top: 1rem;
+    color: #64748b;
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.dark .section-description {
+    color: #94a3b8;
+}
+
+/* Tampilan mobile */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 2.2rem;
+    }
+}

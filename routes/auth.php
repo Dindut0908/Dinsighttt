@@ -19,7 +19,7 @@ Route::post('/login', function (Request $request) {
 
         $request->session()->regenerate();
 
-        return redirect('/dashboard');
+        return redirect('/admin/dashboard');
     }
 
     return back()->withErrors([

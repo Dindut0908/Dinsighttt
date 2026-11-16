@@ -2,16 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* BODY */
-body{
-    background: #060816;
-    color: white;
-    overflow-x: hidden;
+html {
+    scroll-behavior: smooth;
 }
 
-/* SCROLL */
-html{
-    scroll-behavior: smooth;
+body {
+    overflow-x: hidden;
 }
 
 /* ANIMATED GRADIENT */

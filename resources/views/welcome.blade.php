@@ -12,8 +12,6 @@
 
 @foreach ($projects as $project)
 
-<body class="custom-cursor-page"></body>
-
 <div
     class="group relative overflow-hidden rounded-3xl
     bg-white/5 border border-white/10

@@ -41,22 +41,20 @@ class SkillController extends Controller
         return view('skills.edit', compact('skill'));
     }
 
-    public function update(Request $request, Skill $skill)
-    {
-        $request->validate([
-            'name' => 'required',
-            'icon' => 'required',
-        ]);
+public function update(Request $request, Skill $skill)
+{
+    $request->validate([
+        'name' => 'required',
+        'icon' => 'required',
+    ]);
 
-        $skill->update([
-            'name' => $request->name,
-            'icon' => $request->icon,
-        ]);
+    $skill->update([
+        'name' => $request->name,
+        'icon' => $request->icon,
+    ]);
 
-        return redirect()
-            ->route('skills.index')
-            ->with('success', 'Skill berhasil diupdate');
-    }
+    return redirect()->route('skills.index');
+}
 
     public function destroy(Skill $skill)
     {
