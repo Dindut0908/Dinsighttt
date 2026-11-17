@@ -1,0 +1,25 @@
+[package]
+name = "dinsight"
+version = "0.1.0"
+description = "Dinsight - Portfolio & Admin on Wasmer Edge"
+license = "MIT"
+entrypoint = "serve"
+
+[dependencies]
+"wasmer/static-web-server" = "^1"
+
+[fs]
+"/public" = "build"
+"/settings" = "settings"
+
+[[command]]
+name = "serve"
+module = "wasmer/static-web-server:webserver"
+runner = "wasi"
+
+[command.annotations.wasi]
+main-args = [
+  "--root", "/public",
+  "--config-file", "/settings/sws.toml",
+  "--page-fallback", "/public/index.html"
+]

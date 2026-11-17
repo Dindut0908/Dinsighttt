@@ -1,0 +1,10 @@
+[general]
+host = "0.0.0.0"
+port = 8080
+root = "/public"
+index-files = "index.html"
+page-fallback = "/public/index.html"
+cache-control-headers = true
+compression = true
+security-headers = true
+directory-listing = false

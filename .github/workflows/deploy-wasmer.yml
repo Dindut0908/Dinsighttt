@@ -1,0 +1,36 @@
+name: Deploy to Wasmer Edge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Setup Wasmer CLI
+        uses: wasmerio/setup-wasmer@v3.1
+
+      - name: Deploy to Wasmer Edge
+        run: wasmer deploy --non-interactive
+        env:
+          WASMER_TOKEN: ${{ secrets.WASMER_TOKEN }}
