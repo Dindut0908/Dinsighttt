@@ -30,6 +30,7 @@ const Home = () => {
 
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
+  const [activeTab, setActiveTab] = useState<'projects' | 'skills'>('projects');
   const [modalProjectId, setModalProjectId] = useState<string | null>(null);
   const [gbName, setGbName] = useState('');
   const [gbEmail, setGbEmail] = useState('');
@@ -227,18 +228,20 @@ const Home = () => {
 
           <div className="flex justify-center gap-3 mt-10 mb-12">
             <button
-              onClick={() => { setCategory('all'); setSearch(''); }}
-              className={`tab-button ${category === 'all' && !search ? 'active-tab' : ''}`}
+              onClick={() => { setActiveTab('projects'); setCategory('all'); setSearch(''); }}
+              className={`tab-button ${activeTab === 'projects' ? 'active-tab' : ''}`}
             >
               <i className="fa-solid fa-folder-open" /> Projects
             </button>
             <button
-              onClick={() => { setCategory('all'); setSearch(''); }}
-              className={`tab-button ${category === 'all' && !search ? 'active-tab' : ''}`}
+              onClick={() => { setActiveTab('skills'); setCategory('all'); setSearch(''); }}
+              className={`tab-button ${activeTab === 'skills' ? 'active-tab' : ''}`}
             >
               <i className="fa-solid fa-code" /> Skills
             </button>
           </div>
+
+          {activeTab === 'projects' && (
 
           <div id="projectFilterBar" className="max-w-5xl mx-auto mt-8 mb-12">
             <div className="relative">
@@ -290,9 +293,10 @@ const Home = () => {
               </div>
             )}
           </div>
+          )}
 
           <div className="overflow-hidden">
-            <div id="slider" className="flex transition-transform duration-700 ease-in-out">
+            <div id="slider" className="flex transition-transform duration-700 ease-in-out" style={{ transform: activeTab === 'skills' ? 'translateX(-100%)' : 'translateX(0)' }}>
               <div className="min-w-full">
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-7">
                   {visibleProjects.length > 0 ? visibleProjects.map((project) => (
