@@ -221,7 +221,7 @@ const Home = () => {
       <section id="projects" className="py-28 relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <p className="section-label">PORTOFOLIO</p>
+            <p className="section-label justify-center">PORTOFOLIO </p>
             <h2 className="section-title">Projek & Keahlian</h2>
             <p className="section-description">Beberapa hasil projek dan kemampuan yang saya kembangkan selama belajar di bidang PPLG.</p>
           </div>
@@ -636,6 +636,7 @@ const Home = () => {
           margin-top: 1rem;
           color: #94a3b8;
           font-size: 0.8rem;
+          justify-content: center;
         }
         .contact-value {
           margin-top: 0.25rem;

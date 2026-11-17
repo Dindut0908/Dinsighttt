@@ -8,38 +8,6 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [roleLoading, setRoleLoading] = useState(true);
 
-  useEffect(() => {
-  // 1. Buat fungsi async di dalam useEffect
-  const getInitialUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setUser(user);
-  };
-
-  getInitialUser();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-      await checkAdminRole(session?.user ?? null);
-    });
-
-    supabase.auth.getSession().then(async ({ data }) => {
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-      await checkAdminRole(data.session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    (_event, session) => {
-      setUser(session?.user ?? null);
-    }
-  );
-
-  return () => {
-    subscription.unsubscribe(); // <-- Pakai subscription.unsubscribe()
-  };
-}, []);
-
   const checkAdminRole = useCallback(async (currentUser: User | null) => {
     if (!currentUser) {
       setIsAdmin(false);
@@ -50,6 +18,43 @@ export function useAuth() {
     setIsAdmin(Boolean(data) && !error);
     setRoleLoading(false);
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    // 1. Ambil sesi awal saat halaman dimuat
+    const initSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setLoading(false);
+          await checkAdminRole(session?.user ?? null);
+        }
+      } catch (error) {
+        console.error("Error getting session:", error);
+        if (mounted) setLoading(false);
+      }
+    };
+
+    initSession();
+
+    // 2. Pantau perubahan status login (auth state change)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setLoading(false);
+          await checkAdminRole(session?.user ?? null);
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [checkAdminRole]);
 
   const signIn = useCallback(
     async (email: string, password: string) => {

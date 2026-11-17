@@ -140,7 +140,7 @@ const Navbar = () => {
                 to="/login"
                 className="text-slate-700 dark:text-white hover:text-cyan-400 transition"
               >
-                Login
+                
               </Link>
             )}
 
@@ -260,7 +260,7 @@ const Navbar = () => {
                 onClick={() => setMobileMenuOpen(false)}
                 className={mobileLinkClass}
               >
-                Login
+                
               </Link>
             )}
 
