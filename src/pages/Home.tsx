@@ -397,9 +397,15 @@ const Home = () => {
                   Lihat informasi pendidikan, kemampuan, pengalaman, projek, dan aktivitas saya dalam CV digital.
                 </p>
               </div>
-              <a href="/cv.pdf" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-slate-900 font-bold hover:-translate-y-1 transition">
-                <i className="fa-solid fa-download" /> Download CV
-              </a>
+              <a 
+  href="/cv_Dini.pdf" 
+  download="CV_Dini.pdf" 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  className="..."
+>
+  <i className="fa-solid fa-download" /> Download CV
+</a>
             </div>
           </div>
         </div>
