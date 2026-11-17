@@ -320,13 +320,13 @@ transition-colors duration-500 overflow-x-hidden">
 
                 @else
 
-                    <a href="{{ route('login') }}"
+                    <!-- <a href="{{ route('login') }}"
                         class="text-slate-800 dark:text-white
                         hover:text-cyan-400 transition">
 
                         Login
 
-                    </a>
+                    </a> -->
 
                 @endauth
 
