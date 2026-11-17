@@ -2,6 +2,12 @@ import { supabase } from '../lib/supabase';
 
 export function getPublicUrl(path: string | null | undefined): string {
   if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  if (path.startsWith('/storage/') || path.startsWith('storage/')) {
+    return path.startsWith('/') ? path : `/${path}`;
+  }
   const { data } = supabase.storage.from('public').getPublicUrl(path);
   return data.publicUrl;
 }
