@@ -52,3 +52,22 @@ export function slugify(text: string): string {
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
+
+export type UploadPayload = {
+  imageFile?: File;
+  removeImage?: boolean;
+  image?: string | null;
+  thumbnailFile?: File;
+  removeThumbnail?: boolean;
+  thumbnail?: string | null;
+  photoFile?: File;
+  removePhoto?: boolean;
+  photo?: string | null;
+};
+
+export function stripUploadFields<T extends UploadPayload>(
+  payload: T,
+): Omit<T, 'imageFile' | 'removeImage' | 'thumbnailFile' | 'removeThumbnail' | 'photoFile' | 'removePhoto'> {
+  const { imageFile, removeImage, thumbnailFile, removeThumbnail, photoFile, removePhoto, ...rest } = payload;
+  return rest;
+}

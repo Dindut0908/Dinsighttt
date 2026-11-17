@@ -4,7 +4,6 @@ import { Plus, Trash2, Edit3, Image } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Textarea from '../components/ui/Textarea';
-import FileInput from '../components/ui/FileInput';
 import { getPublicUrl } from '../hooks/useStorage';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import type { Experience } from '../hooks/useExperiences';
@@ -38,39 +37,34 @@ const AdminExperiences = () => {
     setSubmitting(true);
 
     try {
-      const payload: Record<string, unknown> = {
-        position: form.position,
-        organization: form.organization,
-        period: form.period,
-        description: form.description || null,
-        is_active: form.is_active,
-      };
-      if (form.imageFile) {
-        payload.imageFile = form.imageFile;
-      } else if (!form.image) {
-        payload.removeImage = true;
-      } else {
-        payload.image = form.image;
-      }
-
-      let res;
       if (isEdit && editId) {
-        res = await updateExperience(editId, payload as any);
+        await updateExperience(editId, {
+          position: form.position,
+          organization: form.organization,
+          period: form.period,
+          description: form.description || null,
+          is_active: form.is_active,
+          imageFile: form.imageFile ?? undefined,
+          removeImage: !form.imageFile && !form.image ? true : undefined,
+          image: form.imageFile ? undefined : (form.image || null),
+        });
       } else {
-        res = await createExperience(payload as any);
-      }
-
-      if (res?.error) {
-        const msg = typeof res.error === 'string' ? res.error : res.error.message || 'Gagal menyimpan experience.';
-        setFormError(msg);
-        return;
+        await createExperience({
+          position: form.position,
+          organization: form.organization,
+          period: form.period,
+          description: form.description || null,
+          is_active: form.is_active,
+          imageFile: form.imageFile ?? undefined,
+        });
       }
 
       setEditId(null);
       setForm({ position: '', organization: '', period: '', description: '', image: '', imageFile: null, is_active: true });
       setOpen(false);
-    } catch (err: any) {
-      setFormError(err.message || 'Terjadi kesalahan sistem.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem.';
+      setFormError(msg);
     } finally {
       setSubmitting(false);
     }

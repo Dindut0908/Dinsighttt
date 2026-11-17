@@ -30,22 +30,27 @@ const AdminBlogs = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: Record<string, unknown> = {
-      title: form.title,
-      content: form.content,
-      excerpt: form.excerpt || null,
-      published_at: form.published_at || null,
-      is_published: form.is_published,
-    };
-    if (form.thumbnailFile) payload.thumbnailFile = form.thumbnailFile;
-    else if (!form.thumbnail) payload.removeImage = true;
-    else payload.thumbnail = form.thumbnail;
-
     if (isEdit && editId) {
-      await updateBlog(editId, payload as any);
+      await updateBlog(editId, {
+        title: form.title,
+        content: form.content,
+        excerpt: form.excerpt || null,
+        published_at: form.published_at || null,
+        is_published: form.is_published,
+        thumbnailFile: form.thumbnailFile ?? undefined,
+        removeImage: !form.thumbnailFile && !form.thumbnail ? true : undefined,
+        thumbnail: form.thumbnailFile ? undefined : (form.thumbnail || null),
+      });
       setEditId(null);
     } else {
-      await createBlog(payload as any);
+      await createBlog({
+        title: form.title,
+        content: form.content,
+        excerpt: form.excerpt || null,
+        published_at: form.published_at || null,
+        is_published: form.is_published,
+        thumbnailFile: form.thumbnailFile ?? undefined,
+      });
     }
     setForm({ title: '', content: '', excerpt: '', thumbnail: '', thumbnailFile: null, published_at: new Date().toISOString().split('T')[0], is_published: true });
     setOpen(false);

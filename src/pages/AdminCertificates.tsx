@@ -28,21 +28,25 @@ const AdminCertificates = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: Record<string, unknown> = {
-      name: form.name,
-      issuer: form.issuer,
-      issued_date: form.issued_date || null,
-      credential_url: form.credential_url || null,
-    };
-    if (form.imageFile) payload.imageFile = form.imageFile;
-    else if (!form.image) payload.removeImage = true;
-    else payload.image = form.image;
-
     if (isEdit && editId) {
-      await updateCertificate(editId, payload as any);
+      await updateCertificate(editId, {
+        name: form.name,
+        issuer: form.issuer,
+        issued_date: form.issued_date || null,
+        credential_url: form.credential_url || null,
+        imageFile: form.imageFile ?? undefined,
+        removeImage: !form.imageFile && !form.image ? true : undefined,
+        image: form.imageFile ? undefined : (form.image || null),
+      });
       setEditId(null);
     } else {
-      await createCertificate(payload as any);
+      await createCertificate({
+        name: form.name,
+        issuer: form.issuer,
+        issued_date: form.issued_date || null,
+        credential_url: form.credential_url || null,
+        imageFile: form.imageFile ?? undefined,
+      });
     }
     setForm({ name: '', issuer: '', issued_date: '', image: '', imageFile: null, credential_url: '' });
     setOpen(false);

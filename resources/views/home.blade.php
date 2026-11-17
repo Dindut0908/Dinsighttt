@@ -318,10 +318,10 @@
                     shadow-2xl">
 
                     <img
-                        src="{{ asset('storage/app/public/entrepreneurs/dini.png') }}"
-                        alt="Foto Profil Dini"
-                        class="w-full h-full object-cover"
-                    >
+    src="{{ asset('storage/entrepreneurs/dini.png') }}"
+    alt="Foto Profil Dini"
+    class="w-full h-full object-cover"
+>
 
                     {{-- Bottom Overlay --}}
                     <div class="absolute bottom-0 left-0 right-0
@@ -1264,7 +1264,7 @@
     CV PREVIEW
 ========================================================= --}}
 
-<section id="#cv"
+<section id="cv"
     class="py-24">
 
     <div class="max-w-5xl mx-auto px-6">

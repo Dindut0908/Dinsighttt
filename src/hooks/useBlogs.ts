@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../lib/database.types';
-import { slugify } from '../lib/validations';
+import { slugify, stripUploadFields } from '../lib/validations';
 
 export type Blog = Database['public']['Tables']['blogs']['Row'];
 export type BlogInsert = Database['public']['Tables']['blogs']['Insert'];
@@ -29,17 +29,22 @@ export function useBlogs() {
 
   const createBlog = useCallback(
     async (payload: BlogInsert & { thumbnailFile?: File; removeImage?: boolean }) => {
-      let thumbnailPath = payload.thumbnail;
-      if (payload.thumbnailFile) {
-        const fileName = `${Date.now()}-${payload.thumbnailFile.name.replace(/\s+/g, '_')}`;
+      const { thumbnailFile, removeImage, ...dbPayload } = stripUploadFields(payload);
+
+      let thumbnailPath = dbPayload.thumbnail as string | undefined;
+      if (thumbnailFile) {
+        const fileName = `${Date.now()}-${thumbnailFile.name.replace(/\s+/g, '_')}`;
         const { error: uploadErr } = await supabase.storage
           .from('public')
-          .upload(`blogs/${fileName}`, payload.thumbnailFile);
-        if (uploadErr) return { data: null, error: uploadErr };
+          .upload(`blogs/${fileName}`, thumbnailFile);
+        if (uploadErr) return { error: uploadErr.message };
         thumbnailPath = `blogs/${fileName}`;
+      } else if (removeImage && dbPayload.thumbnail) {
+        await supabase.storage.from('public').remove([dbPayload.thumbnail]);
+        thumbnailPath = undefined;
       }
-      const slug = payload.slug || `${slugify(payload.title)}-${Date.now()}`;
-      const { thumbnailFile, removeImage, ...dbPayload } = payload as any;
+
+      const slug = dbPayload.slug || `${slugify(dbPayload.title)}-${Date.now()}`;
       const { data, error } = await supabase
         .from('blogs')
         .insert({ ...dbPayload, slug, thumbnail: thumbnailPath })
@@ -56,23 +61,25 @@ export function useBlogs() {
       id: string,
       payload: BlogUpdate & { thumbnailFile?: File; removeImage?: boolean },
     ) => {
-      let thumbnailPath = payload.thumbnail as string | undefined;
-      if (payload.removeImage && payload.thumbnail) {
-        await supabase.storage.from('public').remove([payload.thumbnail]);
-        thumbnailPath = null as any;
+      const { thumbnailFile, removeImage, ...dbPayload } = stripUploadFields(payload);
+
+      let thumbnailPath = dbPayload.thumbnail as string | undefined;
+      if (removeImage && dbPayload.thumbnail) {
+        await supabase.storage.from('public').remove([dbPayload.thumbnail]);
+        thumbnailPath = undefined;
       }
-      if (payload.thumbnailFile) {
-        if (payload.thumbnail) {
-          await supabase.storage.from('public').remove([payload.thumbnail]);
+      if (thumbnailFile) {
+        if (dbPayload.thumbnail) {
+          await supabase.storage.from('public').remove([dbPayload.thumbnail]);
         }
-        const fileName = `${Date.now()}-${payload.thumbnailFile.name.replace(/\s+/g, '_')}`;
+        const fileName = `${Date.now()}-${thumbnailFile.name.replace(/\s+/g, '_')}`;
         const { error: uploadErr } = await supabase.storage
           .from('public')
-          .upload(`blogs/${fileName}`, payload.thumbnailFile);
-        if (uploadErr) return { data: null, error: uploadErr };
+          .upload(`blogs/${fileName}`, thumbnailFile);
+        if (uploadErr) return { error: uploadErr.message };
         thumbnailPath = `blogs/${fileName}`;
       }
-      const { thumbnailFile, removeImage, ...dbPayload } = payload as any;
+
       const { data, error } = await supabase
         .from('blogs')
         .update({ ...dbPayload, thumbnail: thumbnailPath })

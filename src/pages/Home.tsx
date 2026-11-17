@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRightFromSquare, Eye, ArrowRight } from 'lucide-react';
+import { ArrowUpRightFromSquare, ArrowRight } from 'lucide-react';
 import { useProjects } from '../hooks/useProjects';
 import { useSkills } from '../hooks/useSkills';
 import { useExperiences } from '../hooks/useExperiences';

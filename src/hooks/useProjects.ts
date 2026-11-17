@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../lib/database.types';
+import { stripUploadFields } from '../lib/validations';
 
 export type Project = Database['public']['Tables']['projects']['Row'];
 export type ProjectInsert = Database['public']['Tables']['projects']['Insert'];
@@ -28,16 +29,21 @@ export function useProjects() {
 
   const createProject = useCallback(
     async (payload: ProjectInsert & { imageFile?: File; removeImage?: boolean }) => {
-      let imagePath = payload.image;
-      if (payload.imageFile) {
-        const fileName = `${Date.now()}-${payload.imageFile.name.replace(/\s+/g, '_')}`;
+      const { imageFile, removeImage, ...dbPayload } = stripUploadFields(payload);
+
+      let imagePath = dbPayload.image as string | undefined;
+      if (imageFile) {
+        const fileName = `${Date.now()}-${imageFile.name.replace(/\s+/g, '_')}`;
         const { error: uploadErr } = await supabase.storage
           .from('public')
-          .upload(`projects/${fileName}`, payload.imageFile);
-        if (uploadErr) return { data: null, error: uploadErr };
+          .upload(`projects/${fileName}`, imageFile);
+        if (uploadErr) return { error: uploadErr.message };
         imagePath = `projects/${fileName}`;
+      } else if (removeImage && dbPayload.image) {
+        await supabase.storage.from('public').remove([dbPayload.image]);
+        imagePath = undefined;
       }
-      const { imageFile, removeImage, ...dbPayload } = payload as any;
+
       const { data, error } = await supabase
         .from('projects')
         .insert({ ...dbPayload, image: imagePath })
@@ -54,23 +60,25 @@ export function useProjects() {
       id: string,
       payload: ProjectUpdate & { imageFile?: File; removeImage?: boolean },
     ) => {
-      let imagePath = payload.image as string | undefined;
-      if (payload.removeImage && payload.image) {
-        await supabase.storage.from('public').remove([payload.image]);
-        imagePath = null as any;
+      const { imageFile, removeImage, ...dbPayload } = stripUploadFields(payload);
+
+      let imagePath = dbPayload.image as string | undefined;
+      if (removeImage && dbPayload.image) {
+        await supabase.storage.from('public').remove([dbPayload.image]);
+        imagePath = undefined;
       }
-      if (payload.imageFile) {
-        if (payload.image) {
-          await supabase.storage.from('public').remove([payload.image]);
+      if (imageFile) {
+        if (dbPayload.image) {
+          await supabase.storage.from('public').remove([dbPayload.image]);
         }
-        const fileName = `${Date.now()}-${payload.imageFile.name.replace(/\s+/g, '_')}`;
+        const fileName = `${Date.now()}-${imageFile.name.replace(/\s+/g, '_')}`;
         const { error: uploadErr } = await supabase.storage
           .from('public')
-          .upload(`projects/${fileName}`, payload.imageFile);
-        if (uploadErr) return { data: null, error: uploadErr };
+          .upload(`projects/${fileName}`, imageFile);
+        if (uploadErr) return { error: uploadErr.message };
         imagePath = `projects/${fileName}`;
       }
-      const { imageFile, removeImage, ...dbPayload } = payload as any;
+
       const { data, error } = await supabase
         .from('projects')
         .update({ ...dbPayload, image: imagePath })

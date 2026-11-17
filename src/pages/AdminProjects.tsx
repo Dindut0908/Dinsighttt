@@ -32,19 +32,17 @@ const AdminProjects = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isEdit && editId) {
-      const payload: Record<string, unknown> = {
+      await updateProject(editId, {
         title: form.title,
         description: form.description,
         demo_link: form.demo_link || null,
         repo_link: form.repo_link || null,
         tech_stack: form.tech_stack || null,
-      };
-      if (form.imageFile) payload.imageFile = form.imageFile;
-      else if (!form.image) payload.removeImage = true;
-      else payload.image = form.image;
-      await updateProject(editId, payload as any);
+        imageFile: form.imageFile ?? undefined,
+        removeImage: !form.imageFile && !form.image ? true : undefined,
+        image: form.imageFile ? undefined : (form.image || null),
+      });
       setEditId(null);
-      setForm({ title: '', description: '', demo_link: '', repo_link: '', tech_stack: '', image: '', imageFile: null });
     } else {
       await createProject({
         title: form.title,
@@ -54,8 +52,8 @@ const AdminProjects = () => {
         tech_stack: form.tech_stack || null,
         imageFile: form.imageFile ?? undefined,
       });
-      setForm({ title: '', description: '', demo_link: '', repo_link: '', tech_stack: '', image: '', imageFile: null });
     }
+    setForm({ title: '', description: '', demo_link: '', repo_link: '', tech_stack: '', image: '', imageFile: null });
     setOpen(false);
   };
 
