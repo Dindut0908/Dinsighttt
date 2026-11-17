@@ -1,22 +1,21 @@
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-import { createClient } from '@supabase/supabase-js';
-
-// Mengambil konfigurasi dari file .env.local
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Memastikan konfigurasi Supabase tersedia
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Supabase URL atau Anon Key belum diatur. Periksa file .env.local dan pastikan VITE_SUPABASE_URL serta VITE_SUPABASE_ANON_KEY sudah diisi.',
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+
+if (!isSupabaseConfigured) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[Dinsight] VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY belum diisi. ' +
+      'Silakan tambahkan keduanya di dashboard Vercel/Netlify (Environment Variables).',
   );
 }
 
-// Membuat koneksi ke Supabase
-export const supabase = createClient(
-  supabaseUrl,
-  supabaseAnonKey,
+export const supabase: SupabaseClient = createClient(
+  supabaseUrl ?? 'https://placeholder.supabase.co',
+  supabaseAnonKey ?? 'placeholder-anon-key',
 );
 
-// Export default
 export default supabase;

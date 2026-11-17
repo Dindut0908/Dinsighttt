@@ -5,23 +5,50 @@ import type { User } from '@supabase/supabase-js';
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [roleLoading, setRoleLoading] = useState(true);
 
   useEffect(() => {
-    setUser(supabase.auth.user());
+  // 1. Buat fungsi async di dalam useEffect
+  const getInitialUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+  };
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+  getInitialUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
+      await checkAdminRole(session?.user ?? null);
     });
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       setUser(data.session?.user ?? null);
       setLoading(false);
+      await checkAdminRole(data.session?.user ?? null);
     });
 
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+      setUser(session?.user ?? null);
+    }
+  );
+
+  return () => {
+    subscription.unsubscribe(); // <-- Pakai subscription.unsubscribe()
+  };
+}, []);
+
+  const checkAdminRole = useCallback(async (currentUser: User | null) => {
+    if (!currentUser) {
+      setIsAdmin(false);
+      setRoleLoading(false);
+      return;
+    }
+    const { data, error } = await supabase.rpc('is_admin');
+    setIsAdmin(Boolean(data) && !error);
+    setRoleLoading(false);
   }, []);
 
   const signIn = useCallback(
@@ -49,5 +76,5 @@ export function useAuth() {
     return { error };
   }, []);
 
-  return { user, loading, signIn, signUp, signOut };
+  return { user, loading, isAdmin, roleLoading, signIn, signUp, signOut };
 }
