@@ -318,7 +318,7 @@
                     shadow-2xl">
 
                     <img
-                        src="{{ asset('storage/entrepreneurs/dini.png') }}"
+                        src="{{ asset('storage/app/public/entrepreneurs/dini.png') }}"
                         alt="Foto Profil Dini"
                         class="w-full h-full object-cover"
                     >
@@ -1264,7 +1264,7 @@
     CV PREVIEW
 ========================================================= --}}
 
-<section id="cv"
+<section id="#cv"
     class="py-24">
 
     <div class="max-w-5xl mx-auto px-6">
