@@ -17,6 +17,9 @@ const AdminExperiences = () => {
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [confirmImage, setConfirmImage] = useState<string | undefined>(undefined);
 
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
   const [form, setForm] = useState({
     position: '',
     organization: '',
@@ -31,29 +34,51 @@ const AdminExperiences = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: Record<string, unknown> = {
-      position: form.position,
-      organization: form.organization,
-      period: form.period,
-      description: form.description || null,
-      is_active: form.is_active,
-    };
-    if (form.imageFile) payload.imageFile = form.imageFile;
-    else if (!form.image) payload.removeImage = true;
-    else payload.image = form.image;
+    setFormError(null);
+    setSubmitting(true);
 
-    if (isEdit && editId) {
-      await updateExperience(editId, payload as any);
+    try {
+      const payload: Record<string, unknown> = {
+        position: form.position,
+        organization: form.organization,
+        period: form.period,
+        description: form.description || null,
+        is_active: form.is_active,
+      };
+      if (form.imageFile) {
+        payload.imageFile = form.imageFile;
+      } else if (!form.image) {
+        payload.removeImage = true;
+      } else {
+        payload.image = form.image;
+      }
+
+      let res;
+      if (isEdit && editId) {
+        res = await updateExperience(editId, payload as any);
+      } else {
+        res = await createExperience(payload as any);
+      }
+
+      if (res?.error) {
+        const msg = typeof res.error === 'string' ? res.error : res.error.message || 'Gagal menyimpan experience.';
+        setFormError(msg);
+        return;
+      }
+
       setEditId(null);
-    } else {
-      await createExperience(payload as any);
+      setForm({ position: '', organization: '', period: '', description: '', image: '', imageFile: null, is_active: true });
+      setOpen(false);
+    } catch (err: any) {
+      setFormError(err.message || 'Terjadi kesalahan sistem.');
+    } finally {
+      setSubmitting(false);
     }
-    setForm({ position: '', organization: '', period: '', description: '', image: '', imageFile: null, is_active: true });
-    setOpen(false);
   };
 
   const handleEdit = (exp: Experience) => {
     setEditId(exp.id);
+    setFormError(null);
     setForm({
       position: exp.position,
       organization: exp.organization,
@@ -76,7 +101,7 @@ const AdminExperiences = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-black">Experiences</h2>
-        <Button onClick={() => { setEditId(null); setForm({ position: '', organization: '', period: '', description: '', image: '', imageFile: null, is_active: true }); setOpen(true); }}>
+        <Button onClick={() => { setEditId(null); setFormError(null); setForm({ position: '', organization: '', period: '', description: '', image: '', imageFile: null, is_active: true }); setOpen(true); }}>
           <Plus className="w-4 h-4 mr-2" /> Tambah Experience
         </Button>
       </div>
@@ -129,6 +154,13 @@ const AdminExperiences = () => {
         title={isEdit ? 'Edit Experience' : 'Tambah Experience'}
       >
         <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
+          {formError && (
+            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-medium">
+              <i className="fa-solid fa-circle-exclamation mr-2" />
+              {formError}
+            </div>
+          )}
+
           <Input label="Posisi / Kegiatan" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} required placeholder="Contoh: Web Developer Intern" />
           <div className="grid md:grid-cols-2 gap-4">
             <Input label="Nama Instansi" value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} required />
@@ -149,19 +181,19 @@ const AdminExperiences = () => {
                 </button>
               </div>
             )}
-            <FileInput label="Pilih Gambar" accept="image/*" onRemove={() => setForm({ ...form, image: '', imageFile: null })} />
             <input
-              id="file-input-exp"
               type="file"
               accept="image/*"
               onChange={(e) => {
                 if (e.target.files?.[0]) setForm({ ...form, imageFile: e.target.files[0] });
               }}
-              className="hidden"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white text-sm focus:outline-none transition file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500 file:text-white hover:file:bg-cyan-600 cursor-pointer"
             />
-            <button type="button" onClick={() => document.getElementById('file-input-exp')?.click()} className="text-xs text-cyan-500 hover:underline">
-              Pilih file gambar
-            </button>
+            {form.imageFile && (
+              <p className="mt-1 text-xs text-cyan-500">
+                File dipilih: {form.imageFile.name} ({(form.imageFile.size / 1024).toFixed(1)} KB)
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -173,8 +205,10 @@ const AdminExperiences = () => {
             <label className="text-sm text-slate-700 dark:text-slate-300">Tampilkan di Website</label>
           </div>
           <div className="flex gap-3 pt-2">
-            <Button type="submit" disabled={loading} className="flex-1">{isEdit ? 'Update' : 'Simpan'}</Button>
-            <Button variant="ghost" onClick={() => setOpen(false)} className="flex-1">Batal</Button>
+            <Button type="submit" disabled={submitting || loading} className="flex-1">
+              {submitting ? 'Menyimpan...' : isEdit ? 'Update' : 'Simpan'}
+            </Button>
+            <Button variant="ghost" type="button" onClick={() => setOpen(false)} className="flex-1">Batal</Button>
           </div>
         </form>
       </Modal>

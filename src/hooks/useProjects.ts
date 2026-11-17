@@ -27,19 +27,20 @@ export function useProjects() {
   }, [fetchProjects]);
 
   const createProject = useCallback(
-    async (payload: ProjectInsert & { imageFile?: File }) => {
+    async (payload: ProjectInsert & { imageFile?: File; removeImage?: boolean }) => {
       let imagePath = payload.image;
       if (payload.imageFile) {
         const fileName = `${Date.now()}-${payload.imageFile.name.replace(/\s+/g, '_')}`;
         const { error: uploadErr } = await supabase.storage
           .from('public')
           .upload(`projects/${fileName}`, payload.imageFile);
-        if (uploadErr) return { error: uploadErr.message };
+        if (uploadErr) return { data: null, error: uploadErr };
         imagePath = `projects/${fileName}`;
       }
+      const { imageFile, removeImage, ...dbPayload } = payload as any;
       const { data, error } = await supabase
         .from('projects')
-        .insert({ ...payload, image: imagePath })
+        .insert({ ...dbPayload, image: imagePath })
         .select()
         .single();
       if (!error) await fetchProjects();
@@ -56,7 +57,7 @@ export function useProjects() {
       let imagePath = payload.image as string | undefined;
       if (payload.removeImage && payload.image) {
         await supabase.storage.from('public').remove([payload.image]);
-        imagePath = undefined;
+        imagePath = null as any;
       }
       if (payload.imageFile) {
         if (payload.image) {
@@ -66,12 +67,13 @@ export function useProjects() {
         const { error: uploadErr } = await supabase.storage
           .from('public')
           .upload(`projects/${fileName}`, payload.imageFile);
-        if (uploadErr) return { error: uploadErr.message };
+        if (uploadErr) return { data: null, error: uploadErr };
         imagePath = `projects/${fileName}`;
       }
+      const { imageFile, removeImage, ...dbPayload } = payload as any;
       const { data, error } = await supabase
         .from('projects')
-        .update({ ...payload, image: imagePath })
+        .update({ ...dbPayload, image: imagePath })
         .eq('id', id)
         .select()
         .single();

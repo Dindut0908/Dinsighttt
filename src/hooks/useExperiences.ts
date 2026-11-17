@@ -27,19 +27,20 @@ export function useExperiences() {
   }, [fetchExperiences]);
 
   const createExperience = useCallback(
-    async (payload: ExperienceInsert & { imageFile?: File }) => {
+    async (payload: ExperienceInsert & { imageFile?: File; removeImage?: boolean }) => {
       let imagePath = payload.image;
       if (payload.imageFile) {
         const fileName = `${Date.now()}-${payload.imageFile.name.replace(/\s+/g, '_')}`;
         const { error: uploadErr } = await supabase.storage
           .from('public')
           .upload(`experiences/${fileName}`, payload.imageFile);
-        if (uploadErr) return { error: uploadErr.message };
+        if (uploadErr) return { data: null, error: uploadErr };
         imagePath = `experiences/${fileName}`;
       }
+      const { imageFile, removeImage, ...dbPayload } = payload as any;
       const { data, error } = await supabase
         .from('experiences')
-        .insert({ ...payload, image: imagePath })
+        .insert({ ...dbPayload, image: imagePath })
         .select()
         .single();
       if (!error) await fetchExperiences();
@@ -56,7 +57,7 @@ export function useExperiences() {
       let imagePath = payload.image as string | undefined;
       if (payload.removeImage && payload.image) {
         await supabase.storage.from('public').remove([payload.image]);
-        imagePath = undefined;
+        imagePath = null as any;
       }
       if (payload.imageFile) {
         if (payload.image) {
@@ -66,12 +67,13 @@ export function useExperiences() {
         const { error: uploadErr } = await supabase.storage
           .from('public')
           .upload(`experiences/${fileName}`, payload.imageFile);
-        if (uploadErr) return { error: uploadErr.message };
+        if (uploadErr) return { data: null, error: uploadErr };
         imagePath = `experiences/${fileName}`;
       }
+      const { imageFile, removeImage, ...dbPayload } = payload as any;
       const { data, error } = await supabase
         .from('experiences')
-        .update({ ...payload, image: imagePath })
+        .update({ ...dbPayload, image: imagePath })
         .eq('id', id)
         .select()
         .single();

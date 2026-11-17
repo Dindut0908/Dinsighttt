@@ -28,20 +28,21 @@ export function useBlogs() {
   }, [fetchBlogs]);
 
   const createBlog = useCallback(
-    async (payload: BlogInsert & { thumbnailFile?: File }) => {
+    async (payload: BlogInsert & { thumbnailFile?: File; removeImage?: boolean }) => {
       let thumbnailPath = payload.thumbnail;
       if (payload.thumbnailFile) {
         const fileName = `${Date.now()}-${payload.thumbnailFile.name.replace(/\s+/g, '_')}`;
         const { error: uploadErr } = await supabase.storage
           .from('public')
           .upload(`blogs/${fileName}`, payload.thumbnailFile);
-        if (uploadErr) return { error: uploadErr.message };
+        if (uploadErr) return { data: null, error: uploadErr };
         thumbnailPath = `blogs/${fileName}`;
       }
       const slug = payload.slug || `${slugify(payload.title)}-${Date.now()}`;
+      const { thumbnailFile, removeImage, ...dbPayload } = payload as any;
       const { data, error } = await supabase
         .from('blogs')
-        .insert({ ...payload, slug, thumbnail: thumbnailPath })
+        .insert({ ...dbPayload, slug, thumbnail: thumbnailPath })
         .select()
         .single();
       if (!error) await fetchBlogs();
@@ -58,7 +59,7 @@ export function useBlogs() {
       let thumbnailPath = payload.thumbnail as string | undefined;
       if (payload.removeImage && payload.thumbnail) {
         await supabase.storage.from('public').remove([payload.thumbnail]);
-        thumbnailPath = undefined;
+        thumbnailPath = null as any;
       }
       if (payload.thumbnailFile) {
         if (payload.thumbnail) {
@@ -68,12 +69,13 @@ export function useBlogs() {
         const { error: uploadErr } = await supabase.storage
           .from('public')
           .upload(`blogs/${fileName}`, payload.thumbnailFile);
-        if (uploadErr) return { error: uploadErr.message };
+        if (uploadErr) return { data: null, error: uploadErr };
         thumbnailPath = `blogs/${fileName}`;
       }
+      const { thumbnailFile, removeImage, ...dbPayload } = payload as any;
       const { data, error } = await supabase
         .from('blogs')
-        .update({ ...payload, thumbnail: thumbnailPath })
+        .update({ ...dbPayload, thumbnail: thumbnailPath })
         .eq('id', id)
         .select()
         .single();

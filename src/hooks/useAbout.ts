@@ -56,7 +56,7 @@ export function useAbout() {
       let photoPath = payload.photo as string | undefined;
       if (payload.removeImage && payload.photo) {
         await supabase.storage.from('public').remove([payload.photo]);
-        photoPath = undefined;
+        photoPath = null as any;
       }
       if (payload.photoFile) {
         if (payload.photo) {
@@ -66,12 +66,13 @@ export function useAbout() {
         const { error: uploadErr } = await supabase.storage
           .from('public')
           .upload(`abouts/${fileName}`, payload.photoFile);
-        if (uploadErr) return { error: uploadErr.message };
+        if (uploadErr) return { data: null, error: uploadErr };
         photoPath = `abouts/${fileName}`;
       }
+      const { photoFile, removeImage, ...dbPayload } = payload as any;
       const { data, error } = await supabase
         .from('abouts')
-        .update({ ...payload, photo: photoPath })
+        .update({ ...dbPayload, photo: photoPath })
         .eq('id', id)
         .select()
         .single();
