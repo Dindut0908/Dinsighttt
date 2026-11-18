@@ -8,13 +8,19 @@
     "build": "vite build",
     "preview": "vite preview",
     "wasmer:build": "vite build",
-    "wasmer:deploy": "vite build && wasmer deploy"
+    "wasmer:deploy": "vite build && wasmer deploy",
+    "start": "node server/index.js",
+    "dev:api": "node server/index.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.119.0",
+    "bcryptjs": "^3.0.3",
     "clsx": "^2.1.0",
     "date-fns": "^3.6.0",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.344.0",
+    "multer": "^2.5.0",
+    "mysql2": "^3.24.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.0"
